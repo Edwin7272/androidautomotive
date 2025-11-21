@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Latineo Radio</string>
+    <string name="play">Reproducir</string>
+    <string name="pause">Pausar</string>
+    <string name="stop">Detener</string>
+    <string name="playing">Reproduciendo: Latineo Radio</string>
+    <string name="paused">Pausado</string>
+    <string name="stopped">Detenido</string>
+    <string name="buffering">Cargando…</string>
+    <string name="error">Error de reproducción</string>
+    <string name="ready">Listo para reproducir</string>
+</resources>
