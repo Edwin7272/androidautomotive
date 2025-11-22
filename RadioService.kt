@@ -3,7 +3,11 @@ package com.latineo.radio
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -23,19 +27,23 @@ class RadioService : MediaBrowserServiceCompat() {
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var stateBuilder: PlaybackStateCompat.Builder
     private var player: ExoPlayer? = null
+    private var audioManager: AudioManager? = null
+    private var audioFocusRequest: AudioFocusRequest? = null
+    private var wasPlayingBeforeFocusLoss = false
+    private var currentStreamUrl: String = ""
+    private var currentEmisora: String = ""
 
     companion object {
         private const val CHANNEL_ID = "latineo_radio_channel"
         private const val NOTIFICATION_ID = 1
         private const val MEDIA_ROOT_ID = "latineo_root"
-
-        private fun getStreamUrl(): String = BuildConfig.RADIO_STREAM_URL
     }
 
     override fun onCreate() {
         super.onCreate()
 
         createNotificationChannel()
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         // Crear MediaSession
         mediaSession = MediaSessionCompat(this, "LatineoRadioService").apply {
@@ -60,6 +68,14 @@ class RadioService : MediaBrowserServiceCompat() {
                 override fun onStop() {
                     stopPlayback()
                 }
+
+                override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
+                    super.onPlayFromMediaId(mediaId, extras)
+                    when (mediaId) {
+                        "sevilla" -> playSevilla()
+                        "malaga" -> playMalaga()
+                    }
+                }
             })
 
             setSessionToken(sessionToken)
@@ -79,10 +95,100 @@ class RadioService : MediaBrowserServiceCompat() {
         }
     }
 
+    private fun playSevilla() {
+        val newUrl = getString(R.string.sevilla_url)
+        val newEmisora = getString(R.string.sevilla)
+
+        if (player?.isPlaying == true && currentStreamUrl != newUrl) {
+            cambiarStream(newUrl, newEmisora)
+        } else {
+            currentStreamUrl = newUrl
+            currentEmisora = newEmisora
+            startPlayback()
+        }
+    }
+
+    private fun playMalaga() {
+        val newUrl = getString(R.string.malaga_url)
+        val newEmisora = getString(R.string.malaga)
+
+        if (player?.isPlaying == true && currentStreamUrl != newUrl) {
+            cambiarStream(newUrl, newEmisora)
+        } else {
+            currentStreamUrl = newUrl
+            currentEmisora = newEmisora
+            startPlayback()
+        }
+    }
+
+    private fun cambiarStream(newUrl: String, newEmisora: String) {
+        player?.let {
+            currentStreamUrl = newUrl
+            currentEmisora = newEmisora
+
+            it.clearMediaItems()
+            val mediaItem = MediaItem.fromUri(Uri.parse(newUrl))
+            it.setMediaItem(mediaItem)
+            it.prepare()
+            it.play()
+
+            updatePlaybackState()
+            startForeground(NOTIFICATION_ID, createNotification())
+        }
+    }
+
+    private fun requestAudioFocus(): Boolean {
+        audioManager?.let {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
+
+            audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(audioAttributes)
+                .setOnAudioFocusChangeListener { focusChange ->
+                    when (focusChange) {
+                        AudioManager.AUDIOFOCUS_GAIN -> {
+                            if (wasPlayingBeforeFocusLoss) {
+                                player?.play()
+                                wasPlayingBeforeFocusLoss = false
+                            }
+                        }
+                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
+                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
+                            if (player?.isPlaying == true) {
+                                wasPlayingBeforeFocusLoss = true
+                                player?.pause()
+                            }
+                        }
+                        AudioManager.AUDIOFOCUS_LOSS -> {
+                            stopPlayback()
+                        }
+                    }
+                }
+                .build()
+
+            return it.requestAudioFocus(audioFocusRequest!!) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        }
+        return false
+    }
+
+    private fun abandonAudioFocus() {
+        audioManager?.let {
+            audioFocusRequest?.let { request ->
+                it.abandonAudioFocusRequest(request)
+            }
+        }
+    }
+
     private fun startPlayback() {
         player?.let {
-            if (it.mediaItemCount == 0) {
-                val mediaItem = MediaItem.fromUri(Uri.parse(getStreamUrl()))
+            if (!requestAudioFocus()) {
+                return
+            }
+
+            if (it.mediaItemCount == 0 && currentStreamUrl.isNotEmpty()) {
+                val mediaItem = MediaItem.fromUri(Uri.parse(currentStreamUrl))
                 it.setMediaItem(mediaItem)
                 it.prepare()
             }
@@ -106,6 +212,9 @@ class RadioService : MediaBrowserServiceCompat() {
         }
         mediaSession.isActive = false
         stopForeground(STOP_FOREGROUND_REMOVE)
+        abandonAudioFocus()
+        currentStreamUrl = ""
+        currentEmisora = ""
         updatePlaybackState()
     }
 
@@ -129,9 +238,15 @@ class RadioService : MediaBrowserServiceCompat() {
 
         mediaSession.setPlaybackState(stateBuilder.build())
 
-        // Actualizar metadata
+        // Actualizar metadata con la emisora actual
+        val titulo = if (currentEmisora.isNotEmpty()) {
+            "Latineo Radio - $currentEmisora"
+        } else {
+            "Latineo Radio"
+        }
+
         val metadata = MediaMetadataCompat.Builder()
-            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "Latineo Radio")
+            .putString(MediaMetadataCompat.METADATA_KEY_TITLE, titulo)
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, "En vivo")
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, "Streaming")
             .build()
@@ -139,9 +254,15 @@ class RadioService : MediaBrowserServiceCompat() {
     }
 
     private fun createNotification(): Notification {
+        val contentText = if (currentEmisora.isNotEmpty()) {
+            "Reproduciendo: $currentEmisora"
+        } else {
+            "Reproduciendo en vivo"
+        }
+
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Latineo Radio")
-            .setContentText("Reproduciendo en vivo")
+            .setContentText(contentText)
             .setSmallIcon(android.R.drawable.ic_media_play)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -179,15 +300,28 @@ class RadioService : MediaBrowserServiceCompat() {
         val mediaItems = mutableListOf<MediaBrowserCompat.MediaItem>()
 
         if (parentId == MEDIA_ROOT_ID) {
-            val mediaDescription = MediaDescriptionCompat.Builder()
-                .setMediaId("latineo_stream")
-                .setTitle("Latineo Radio")
+            val sevillaDescription = MediaDescriptionCompat.Builder()
+                .setMediaId("sevilla")
+                .setTitle("Latineo Radio Sevilla")
                 .setSubtitle("En vivo")
                 .build()
 
             mediaItems.add(
                 MediaBrowserCompat.MediaItem(
-                    mediaDescription,
+                    sevillaDescription,
+                    MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
+                )
+            )
+
+            val malagaDescription = MediaDescriptionCompat.Builder()
+                .setMediaId("malaga")
+                .setTitle("Latineo Radio Málaga")
+                .setSubtitle("En vivo")
+                .build()
+
+            mediaItems.add(
+                MediaBrowserCompat.MediaItem(
+                    malagaDescription,
                     MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
                 )
             )
@@ -198,6 +332,7 @@ class RadioService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         super.onDestroy()
+        abandonAudioFocus()
         player?.release()
         player = null
         mediaSession.release()
