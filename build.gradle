@@ -11,7 +11,7 @@ android {
         applicationId "com.latineo.radio"
         minSdk 28
         targetSdk 34
-        versionCode 1
+        versionCode 3
         versionName "1.0"
     }
 
