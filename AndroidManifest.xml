@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <!-- Declarar compatibilidad con Android Automotive -->
     <uses-feature
@@ -16,14 +17,23 @@
         android:icon="@mipmap/ic_launcher"
         android:label="Latineo Radio"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
-        
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <!-- Agregar para Automotive -->
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <!-- Intent filter para Android Automotive -->
+            <intent-filter>
+                <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+                <action android:name="android.media.action.MEDIA_PLAY" />
             </intent-filter>
         </activity>
 
