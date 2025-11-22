@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Latineo Radio</string>
-    <string name="play">Reproducir</string>
-    <string name="pause">Pausar</string>
-    <string name="stop">Detener</string>
-    <string name="playing">Reproduciendo: Latineo Radio</string>
-    <string name="paused">Pausado</string>
-    <string name="stopped">Detenido</string>
-    <string name="buffering">Cargando…</string>
-    <string name="error">Error de reproducción</string>
+    <string name="play">▶ REPRODUCIR</string>
+    <string name="pause">⏸ PAUSAR</string>
+    <string name="stop">⏹ DETENER</string>
+    <string name="playing">▶ Reproduciendo: Latineo Radio</string>
+    <string name="paused">⏸ Pausado</string>
+    <string name="stopped">⏹ Detenido</string>
+    <string name="buffering">⏳ Cargando…</string>
+    <string name="error">❌ Error de reproducción</string>
     <string name="ready">Listo para reproducir</string>
+    <string name="disconnected">Desconectado</string>
+    <string name="connection_error">Error de conexión</string>
+    <string name="sevilla">SEVILLA</string>
+    <string name="malaga">MÁLAGA</string>
+    <string name="sevilla_url">https://c18.radioboss.fm:8638/stream</string>
+    <string name="malaga_url">https://c40.radioboss.fm:8058/stream</string>
 </resources>
