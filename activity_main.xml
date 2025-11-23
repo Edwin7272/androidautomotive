@@ -1,145 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1a1a1a"
-    android:padding="32dp">
+    android:orientation="horizontal"
+    android:background="#000000">
 
-    <!-- Logo -->
-    <ImageView
-        android:id="@+id/ivLogo"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:src="@drawable/logo"
-        android:contentDescription="@string/app_name"
-        android:scaleType="centerInside"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp"/>
+    <!-- Lado Izquierdo: Mapa/Navegación -->
+    <FrameLayout
+        android:id="@+id/leftContainer"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#1a1a1a">
 
-    <!-- Título -->
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textSize="48sp"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:letterSpacing="0.1"
-        app:layout_constraintTop_toBottomOf="@id/ivLogo"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        <!-- WebView para Google Maps o contenido de navegación -->
+        <WebView
+            android:id="@+id/mapWebView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-    <!-- Contenedor de selección de emisoras -->
-    <LinearLayout
-        android:id="@+id/emissoras_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp">
+        <!-- Overlay con botones de navegación en la parte izquierda -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_gravity="start|top">
 
-        <!-- Botón Sevilla -->
-        <Button
-            android:id="@+id/btnSevilla"
-            android:layout_width="200dp"
-            android:layout_height="60dp"
-            android:text="@string/sevilla"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:backgroundTint="#FF6B35"
-            android:textColor="#FFFFFF"
-            android:layout_marginEnd="16dp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            <ImageView
+                android:id="@+id/btnHome"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_menu_home"
+                android:layout_marginBottom="8dp"
+                android:contentDescription="Home" />
 
-        <!-- Botón Málaga -->
-        <Button
-            android:id="@+id/btnMalaga"
-            android:layout_width="200dp"
-            android:layout_height="60dp"
-            android:text="@string/malaga"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:backgroundTint="#FF6B35"
-            android:textColor="#FFFFFF"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            <ImageView
+                android:id="@+id/btnSettings"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_menu_preferences"
+                android:layout_marginBottom="8dp"
+                android:contentDescription="Settings" />
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/btnVolume"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@android:drawable/ic_lock_silent_mode_off"
+                android:contentDescription="Volume" />
 
-    <!-- Estado -->
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/ready"
-        android:textSize="24sp"
-        android:textColor="#CCCCCC"
-        app:layout_constraintTop_toBottomOf="@id/emissoras_container"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        </LinearLayout>
 
-    <!-- Emisora seleccionada -->
-    <TextView
-        android:id="@+id/tvEmisora"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Selecciona una emisora"
-        android:textSize="18sp"
-        android:textColor="#FF6B35"
-        app:layout_constraintTop_toBottomOf="@id/tvStatus"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="12dp"/>
+    </FrameLayout>
 
-    <!-- Contenedor de botones de control -->
-    <LinearLayout
-        android:id="@+id/buttonContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/tvEmisora"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="48dp">
+    <!-- Lado Derecho: Radio Player con anillo circular -->
+    <FrameLayout
+        android:id="@+id/rightContainer"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#000000">
 
-        <!-- Botón Play/Pause -->
-        <Button
-            android:id="@+id/btnPlay"
-            android:layout_width="240dp"
-            android:layout_height="100dp"
-            android:text="@string/play"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:backgroundTint="#FF6B35"
-            android:textColor="#FFFFFF"
-            android:layout_marginEnd="24dp"
-            android:enabled="false"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        <!-- Contenedor principal del reproductor de radio -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="24dp">
 
-        <!-- Botón Stop -->
-        <Button
-            android:id="@+id/btnStop"
-            android:layout_width="240dp"
-            android:layout_height="100dp"
-            android:text="@string/stop"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:backgroundTint="#444444"
-            android:textColor="#FFFFFF"
-            android:enabled="false"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+            <!-- Logo -->
+            <ImageView
+                android:id="@+id/ivLogo"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/logo"
+                android:contentDescription="@string/app_name"
+                android:scaleType="centerInside"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="20dp"/>
 
-    </LinearLayout>
+            <!-- Título -->
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textSize="32sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                app:layout_constraintTop_toBottomOf="@id/ivLogo"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="16dp"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- Contenedor del reproductor con anillo circular -->
+            <FrameLayout
+                android:id="@+id/playerCircularContainer"
+                android:layout_width="500dp"
+                android:layout_height="500dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <!-- Anillo circular azul -->
+                <View
+                    android:id="@+id/circularRing"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/circular_ring"
+                    android:layout_gravity="center" />
+
+                <!-- Contenido del reproductor dentro del círculo -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="420dp"
+                    android:layout_height="420dp"
+                    android:layout_gravity="center"
+                    android:background="#8B4513"
+                    android:padding="24dp">
+
+                    <!-- Información de la emisora -->
+                    <TextView
+                        android:id="@+id/tvEmisora"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Latineo Radio"
+                        android:textSize="24sp"
+                        android:textColor="#FFFFFF"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginTop="20dp"/>
+
+                    <!-- Logo central -->
+                    <ImageView
+                        android:id="@+id/ivCentralLogo"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:src="@drawable/logo"
+                        android:contentDescription="Radio Logo"
+                        android:scaleType="centerInside"
+                        app:layout_constraintTop_toBottomOf="@id/tvEmisora"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/playbackControls"
+                        android:layout_marginTop="20dp" />
+
+                    <!-- Controles de reproducción -->
+                    <LinearLayout
+                        android:id="@+id/playbackControls"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        app:layout_constraintBottom_toTopOf="@id/emissoras_container"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginBottom="16dp">
+
+                        <ImageView
+                            android:id="@+id/btnPrevious"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:src="@android:drawable/ic_media_previous"
+                            android:layout_marginEnd="20dp"
+                            android:contentDescription="Previous" />
+
+                        <ImageView
+                            android:id="@+id/btnPlayPause"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:src="@android:drawable/ic_media_pause"
+                            android:layout_marginEnd="20dp"
+                            android:contentDescription="Play/Pause" />
+
+                        <ImageView
+                            android:id="@+id/btnNext"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:src="@android:drawable/ic_media_next"
+                            android:contentDescription="Next" />
+
+                    </LinearLayout>
+
+                    <!-- Contenedor de selección de emisoras -->
+                    <LinearLayout
+                        android:id="@+id/emissoras_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginBottom="20dp">
+
+                        <!-- Botón Sevilla -->
+                        <Button
+                            android:id="@+id/btnSevilla"
+                            android:layout_width="120dp"
+                            android:layout_height="50dp"
+                            android:text="@string/sevilla"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:backgroundTint="#FF6B35"
+                            android:textColor="#FFFFFF"
+                            android:layout_marginEnd="12dp"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+                        <!-- Botón Málaga -->
+                        <Button
+                            android:id="@+id/btnMalaga"
+                            android:layout_width="120dp"
+                            android:layout_height="50dp"
+                            android:text="@string/malaga"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:backgroundTint="#FF6B35"
+                            android:textColor="#FFFFFF"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </FrameLayout>
+
+            <!-- Estado de reproducción (fuera del círculo) -->
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ready"
+                android:textSize="18sp"
+                android:textColor="#CCCCCC"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- Botones ocultos para compatibilidad -->
+            <Button
+                android:id="@+id/btnPlay"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <Button
+                android:id="@+id/btnStop"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
+</LinearLayout>

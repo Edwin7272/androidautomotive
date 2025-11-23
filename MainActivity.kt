@@ -10,6 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
 import android.widget.TextView
 import android.widget.ImageView
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.webkit.WebSettings
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,6 +24,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvStatus: TextView
     private lateinit var tvEmisora: TextView
     private lateinit var ivLogo: ImageView
+    private lateinit var mapWebView: WebView
+    private lateinit var btnPlayPause: ImageView
+    private lateinit var btnPrevious: ImageView
+    private lateinit var btnNext: ImageView
     private var mediaController: MediaControllerCompat? = null
     private var sevillaActiva = false
     private var malagaActiva = false
@@ -109,6 +116,13 @@ class MainActivity : AppCompatActivity() {
         tvStatus = findViewById(R.id.tvStatus)
         tvEmisora = findViewById(R.id.tvEmisora)
         ivLogo = findViewById(R.id.ivLogo)
+        mapWebView = findViewById(R.id.mapWebView)
+        btnPlayPause = findViewById(R.id.btnPlayPause)
+        btnPrevious = findViewById(R.id.btnPrevious)
+        btnNext = findViewById(R.id.btnNext)
+
+        // Configurar WebView para Google Maps
+        setupWebView()
 
         mediaBrowser = MediaBrowserCompat(
             this,
@@ -192,6 +206,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupWebView() {
+        // Configurar WebView para mostrar Google Maps
+        mapWebView.settings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
+        }
+
+        mapWebView.webViewClient = WebViewClient()
+
+        // Cargar Google Maps (puedes personalizar la ubicación)
+        mapWebView.loadUrl("https://www.google.com/maps/@37.3891,-5.9845,14z")
+    }
+
     private fun buildTransportControls() {
         mediaController?.let { controller ->
             controller.registerCallback(controllerCallback)
@@ -209,6 +238,47 @@ class MainActivity : AppCompatActivity() {
 
             btnStop.setOnClickListener {
                 controller.transportControls.stop()
+            }
+
+            // Nuevos controles de reproducción con ImageView
+            btnPlayPause.setOnClickListener {
+                val state = controller.playbackState?.state
+                if (state == PlaybackStateCompat.STATE_PLAYING) {
+                    controller.transportControls.pause()
+                    btnPlayPause.setImageResource(android.R.drawable.ic_media_play)
+                } else if (sevillaActiva || malagaActiva) {
+                    val mediaId = if (sevillaActiva) "sevilla" else "malaga"
+                    controller.transportControls.playFromMediaId(mediaId, null)
+                    btnPlayPause.setImageResource(android.R.drawable.ic_media_pause)
+                }
+            }
+
+            btnPrevious.setOnClickListener {
+                // Cambiar a emisora anterior (Sevilla)
+                if (!sevillaActiva) {
+                    sevillaActiva = true
+                    malagaActiva = false
+                    btnSevilla.text = "⏹"
+                    btnSevilla.setBackgroundColor(getColor(android.R.color.holo_red_dark))
+                    btnMalaga.text = getString(R.string.malaga)
+                    btnMalaga.backgroundTintList = null
+                    tvEmisora.text = getString(R.string.sevilla)
+                    controller.transportControls.playFromMediaId("sevilla", null)
+                }
+            }
+
+            btnNext.setOnClickListener {
+                // Cambiar a emisora siguiente (Málaga)
+                if (!malagaActiva) {
+                    malagaActiva = true
+                    sevillaActiva = false
+                    btnMalaga.text = "⏹"
+                    btnMalaga.setBackgroundColor(getColor(android.R.color.holo_red_dark))
+                    btnSevilla.text = getString(R.string.sevilla)
+                    btnSevilla.backgroundTintList = null
+                    tvEmisora.text = getString(R.string.malaga)
+                    controller.transportControls.playFromMediaId("malaga", null)
+                }
             }
         }
     }
